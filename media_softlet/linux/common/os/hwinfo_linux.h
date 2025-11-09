@@ -33,6 +33,8 @@
 //------------------------------------------------------------------------------
 //| Definitions specific to Linux
 //------------------------------------------------------------------------------
+#define IS_CHERRYVIEW(device_id) ( (device_id & 0xFFF0) == 0x22B0 )
+
 #define IS_BROXTON(device_id)    ( device_id == IBXT_A_DEVICE_F0_ID    || \
         device_id == IBXT_C_DEVICE_F0_ID    || \
         device_id == IBXT_X_DEVICE_F0_ID    || \
@@ -44,7 +46,7 @@
 #define IS_GEMINILAKE(device_id) ( device_id == IGLK_GT2_ULT_18EU_DEVICE_F0_ID || \
         device_id == IGLK_GT2_ULT_12EU_DEVICE_F0_ID)
 
-#define IS_ATOMSOC(device_id)       ( IS_BROXTON(device_id) || IS_GEMINILAKE(device_id))
+#define IS_ATOMSOC(device_id)       ( IS_CHERRYVIEW(device_id) || IS_BROXTON(device_id) || IS_GEMINILAKE(device_id))
 
 extern MOS_STATUS HWInfo_GetGfxProductFamily(int32_t fd, PRODUCT_FAMILY &eProductFamily);
 

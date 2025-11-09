@@ -29,6 +29,11 @@
 #include "linux_skuwa_debug.h"
 #include "linux_media_skuwa.h"
 
+// Define IGFX_CHERRYVIEW if not already defined in igfxfmid.h
+#ifndef IGFX_CHERRYVIEW
+#define IGFX_CHERRYVIEW    (PRODUCT_FAMILY)(IGFX_BROADWELL + 1)
+#endif
+
 //extern template class DeviceInfoFactory<GfxDeviceInfo>;
 typedef DeviceInfoFactory<LinuxDeviceInit> DeviceInit;
 
@@ -41,6 +46,27 @@ static struct LinuxCodecInfo bdwCodecInfo =
     .jpegDecoding       = 1,
     .avcEncoding        = SET_STATUS_BY_FULL_OPEN_SOURCE(1, 0),
     .mpeg2Encoding      = SET_STATUS_BY_FULL_OPEN_SOURCE(1, 0),
+};
+
+static struct LinuxCodecInfo chvCodecInfo =
+{
+    .avcDecoding        = 1,
+    .mpeg2Decoding      = 1,
+    .vp8Decoding        = 1,
+    .vc1Decoding        = SET_STATUS_BY_FULL_OPEN_SOURCE(1, 0),
+    .jpegDecoding       = 1,
+    .avcEncoding        = SET_STATUS_BY_FULL_OPEN_SOURCE(1, 0),
+    .mpeg2Encoding      = 0,
+    .hevcDecoding       = 0,
+    .hevcEncoding       = 0,
+    .jpegEncoding       = 1,
+    .avcVdenc           = 0,
+    .vp9Decoding        = 0,
+    .hevc10Decoding     = 0,
+    .vp9b10Decoding     = 0,
+    .hevc10Encoding     = 0,
+    .hevc12Encoding     = 0,
+    .vp8Encoding        = SET_STATUS_BY_FULL_OPEN_SOURCE(1, 0),
 };
 
 static bool InitBdwMediaSku(struct GfxDeviceInfo *devInfo,
@@ -134,6 +160,86 @@ static bool InitBdwMediaWa(struct GfxDeviceInfo *devInfo,
     return true;
 }
 
+static bool InitChvMediaSku(struct GfxDeviceInfo *devInfo,
+                             MediaFeatureTable *skuTable,
+                             struct LinuxDriverInfo *drvInfo,
+                             MediaUserSettingSharedPtr userSettingPtr)
+{
+    if ((devInfo == nullptr) || (skuTable == nullptr) || (drvInfo == nullptr))
+    {
+        DEVINFO_ERROR("null ptr is passed\n");
+        return false;
+    }
+
+    if (drvInfo->hasBsd)
+    {
+        LinuxCodecInfo *codecInfo = &chvCodecInfo;
+
+        MEDIA_WR_SKU(skuTable, FtrAVCVLDLongDecoding, codecInfo->avcDecoding);
+        MEDIA_WR_SKU(skuTable, FtrMPEG2VLDDecoding, codecInfo->mpeg2Decoding);
+        MEDIA_WR_SKU(skuTable, FtrIntelVP8VLDDecoding, codecInfo->vp8Decoding);
+        MEDIA_WR_SKU(skuTable, FtrVC1VLDDecoding, codecInfo->vc1Decoding);
+        MEDIA_WR_SKU(skuTable, FtrIntelJPEGDecoding, codecInfo->jpegDecoding);
+        MEDIA_WR_SKU(skuTable, FtrEncodeAVC, codecInfo->avcEncoding);
+        MEDIA_WR_SKU(skuTable, FtrEncodeMPEG2, codecInfo->mpeg2Encoding);
+        MEDIA_WR_SKU(skuTable, FtrEncodeJPEG, codecInfo->jpegEncoding);
+        MEDIA_WR_SKU(skuTable, FtrEncodeVP8, codecInfo->vp8Encoding);
+    }
+
+    if (devInfo->eGTType == GTTYPE_GT1)
+    {
+        MEDIA_WR_SKU(skuTable, FtrGT1, 1);
+    }
+    else if (devInfo->eGTType == GTTYPE_GT1_5)
+    {
+        MEDIA_WR_SKU(skuTable, FtrGT1_5, 1);
+    }
+    else if (devInfo->eGTType == GTTYPE_GT2)
+    {
+        MEDIA_WR_SKU(skuTable, FtrGT2, 1);
+    }
+    else
+    {
+        /* GT1 is by default */
+        MEDIA_WR_SKU(skuTable, FtrGT1, 1);
+    }
+
+    MEDIA_WR_SKU(skuTable, FtrLCIA, 1);
+    MEDIA_WR_SKU(skuTable, FtrVERing, drvInfo->hasVebox);
+    MEDIA_WR_SKU(skuTable, FtrPPGTT, drvInfo->hasPpgtt);
+    MEDIA_WR_SKU(skuTable, FtrEDram, devInfo->hasERAM);
+    MEDIA_WR_SKU(skuTable, FtrSingleVeboxSlice, 1);
+    MEDIA_WR_SKU(skuTable, FtrTileY, 1);
+    MEDIA_WR_SKU(skuTable, FtrUseSwSwizzling, 1);
+
+    return true;
+}
+
+static bool InitChvMediaWa(struct GfxDeviceInfo *devInfo,
+                             MediaWaTable *waTable,
+                             struct LinuxDriverInfo *drvInfo)
+{
+    if ((devInfo == nullptr) || (waTable == nullptr) || (drvInfo == nullptr))
+    {
+        DEVINFO_ERROR("null ptr is passed\n");
+        return false;
+    }
+
+    MEDIA_WR_WA(waTable, WaForceGlobalGTT, !drvInfo->hasPpgtt);
+    MEDIA_WR_WA(waTable, WaLLCCachingUnsupported, 1);
+    MEDIA_WR_WA(waTable, WaAddMediaStateFlushCmd, 1);
+    MEDIA_WR_WA(waTable, WaDisableLockForTranscodePerf, 1);
+    MEDIA_WR_WA(waTable, WaSendDummyVFEafterPipelineSelect, 1);
+    MEDIA_WR_WA(waTable, WaVC1UnequalFieldHeights, 1);
+    MEDIA_WR_WA(waTable, WaJPEGHeightAlignYUV422H2YToNV12, 1);
+    MEDIA_WR_WA(waTable, WaEnableDscale, 1);
+    MEDIA_WR_WA(waTable, Wa16KInputHeightNV12Planar420, 1);
+    MEDIA_WR_WA(waTable, WaDisableCodecMmc, 1);
+    MEDIA_WR_WA(waTable, WaDisableSetObjectCapture, 0);
+
+    return true;
+}
+
 static struct LinuxDeviceInit bdwDeviceInit =
 {
     .productFamily = IGFX_BROADWELL,
@@ -141,5 +247,15 @@ static struct LinuxDeviceInit bdwDeviceInit =
     .InitMediaWa      = InitBdwMediaWa,
 };
 
+static struct LinuxDeviceInit chvDeviceInit =
+{
+    .productFamily = IGFX_CHERRYVIEW,
+    .InitMediaFeature = InitChvMediaSku,
+    .InitMediaWa      = InitChvMediaWa,
+};
+
 static bool bdwDeviceRegister = DeviceInfoFactory<LinuxDeviceInit>::
     RegisterDevice(IGFX_BROADWELL, &bdwDeviceInit);
+
+static bool chvDeviceRegister = DeviceInfoFactory<LinuxDeviceInit>::
+    RegisterDevice(IGFX_CHERRYVIEW, &chvDeviceInit);

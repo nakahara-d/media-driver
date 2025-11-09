@@ -74,7 +74,7 @@ export LIBVA_DRIVER_NAME=iHD
 ## Supported Platforms
 
 - BDW (Broadwell)
-- CHV (Cherryview, Braswell) - Supports AVC, MPEG-2, VP8, VC-1, and JPEG decode/encode
+- CHV (Cherryview, Braswell)
 - SKL (Skylake)
 - BXTx (BXT: Broxton, APL: Apollo Lake, GLK: Gemini Lake)
 - KBLx (KBL: Kaby Lake, CFL: Coffee Lake, WHL: Whiskey Lake, CML: Comet Lake, AML: Amber Lake)

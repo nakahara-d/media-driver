@@ -30,11 +30,6 @@
 #include "linux_media_skuwa.h"
 #include "linux_shadow_skuwa.h"
 
-// Define IGFX_CHERRYVIEW if not already defined in igfxfmid.h
-#ifndef IGFX_CHERRYVIEW
-#define IGFX_CHERRYVIEW    (PRODUCT_FAMILY)(IGFX_BROADWELL + 1)
-#endif
-
 #define GEN8_THREADS_PER_EU 7
 
 static bool InitBdwMediaSysInfo(struct GfxDeviceInfo *devInfo, MEDIA_GT_SYSTEM_INFO *sysInfo)

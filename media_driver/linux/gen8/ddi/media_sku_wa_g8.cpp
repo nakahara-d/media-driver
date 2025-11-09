@@ -29,11 +29,6 @@
 #include "linux_skuwa_debug.h"
 #include "linux_media_skuwa.h"
 
-// Define IGFX_CHERRYVIEW if not already defined in igfxfmid.h
-#ifndef IGFX_CHERRYVIEW
-#define IGFX_CHERRYVIEW    (PRODUCT_FAMILY)(IGFX_BROADWELL + 1)
-#endif
-
 //extern template class DeviceInfoFactory<GfxDeviceInfo>;
 typedef DeviceInfoFactory<LinuxDeviceInit> DeviceInit;
 

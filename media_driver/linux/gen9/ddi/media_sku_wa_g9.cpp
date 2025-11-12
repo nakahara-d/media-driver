@@ -628,7 +628,7 @@ static struct LinuxDeviceInit glkDeviceInit =
 static bool sklDeviceRegister = DeviceInfoFactory<LinuxDeviceInit>::
     RegisterDevice(IGFX_SKYLAKE, &sklDeviceInit);
 
-static bool chvDeviceRegister = DeviceInfoFactory<LinuxDeviceInit>::
+static bool bxtDeviceRegister = DeviceInfoFactory<LinuxDeviceInit>::
     RegisterDevice(IGFX_BROXTON, &bxtDeviceInit);
 
 static bool kblDeviceRegister = DeviceInfoFactory<LinuxDeviceInit>::

@@ -365,3 +365,6 @@ extern template class MediaLibvaCapsFactory<MediaLibvaCaps, DDI_MEDIA_CONTEXT>;
 
 static bool bdwRegistered = MediaLibvaCapsFactory<MediaLibvaCaps, DDI_MEDIA_CONTEXT>::
     RegisterCaps<MediaLibvaCapsG8>((uint32_t)IGFX_BROADWELL);
+
+static bool chvRegistered = MediaLibvaCapsFactory<MediaLibvaCaps, DDI_MEDIA_CONTEXT>::
+    RegisterCaps<MediaLibvaCapsG8>((uint32_t)IGFX_CHERRYVIEW);

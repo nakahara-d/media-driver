@@ -153,6 +153,102 @@ static bool InitBdwShadowWa(struct GfxDeviceInfo *devInfo,
     return true;
 }
 
+static bool InitChvMediaSysInfo(struct GfxDeviceInfo *devInfo, MEDIA_GT_SYSTEM_INFO *sysInfo)
+{
+    if ((devInfo == nullptr) || (sysInfo == nullptr))
+    {
+        DEVINFO_ERROR("null ptr is passed\n");
+        return false;
+    }
+
+    if (!sysInfo->SliceCount)
+    {
+        sysInfo->SliceCount    = devInfo->SliceCount;
+    }
+
+    if (!sysInfo->SubSliceCount)
+    {
+        sysInfo->SubSliceCount = devInfo->SubSliceCount;
+    }
+
+    if (!sysInfo->EUCount)
+    {
+        sysInfo->EUCount       = devInfo->EUCount;
+    }
+
+    sysInfo->L3CacheSizeInKb = devInfo->L3CacheSizeInKb;
+    sysInfo->L3BankCount     = devInfo->L3BankCount;
+    sysInfo->VDBoxInfo.Instances.Bits.VDBox0Enabled = 1;
+    sysInfo->VEBoxInfo.Instances.Bits.VEBox0Enabled = 1;
+    sysInfo->MaxEuPerSubSlice = devInfo->MaxEuPerSubSlice;
+    sysInfo->MaxSlicesSupported = sysInfo->SliceCount;
+    sysInfo->MaxSubSlicesSupported = sysInfo->SubSliceCount;
+
+    sysInfo->VEBoxInfo.NumberOfVEBoxEnabled = 1;
+    sysInfo->VDBoxInfo.NumberOfVDBoxEnabled = 1;
+
+    sysInfo->ThreadCount = sysInfo->EUCount * GEN8_THREADS_PER_EU;
+
+    sysInfo->VEBoxInfo.IsValid = true;
+    sysInfo->VDBoxInfo.IsValid = true;
+
+    /* CHV doesn't have LLC */
+    if (devInfo->hasLLC)
+    {
+        sysInfo->LLCCacheSizeInKb = 2 * 1024;
+    }
+
+    return true;
+}
+
+static bool InitChvShadowSku(struct GfxDeviceInfo *devInfo,
+                             SHADOW_MEDIA_FEATURE_TABLE *skuTable,
+                             struct LinuxDriverInfo *drvInfo)
+{
+    if ((devInfo == nullptr) || (skuTable == nullptr) || (drvInfo == nullptr))
+    {
+        DEVINFO_ERROR("null ptr is passed\n");
+        return false;
+    }
+
+    skuTable->FtrVERing = 0;
+    if (drvInfo->hasVebox)
+    {
+       skuTable->FtrVERing = 1;
+    }
+
+    skuTable->FtrVcs2 = 0;
+    skuTable->FtrULT = 0;
+    skuTable->FtrPPGTT = 1;
+    skuTable->FtrIA32eGfxPTEs = 1;
+    skuTable->FtrEDram = 0;
+    skuTable->FtrTileY = 1;
+
+    return true;
+}
+
+static bool InitChvShadowWa(struct GfxDeviceInfo *devInfo,
+                             SHADOW_MEDIA_WA_TABLE *waTable,
+                             struct LinuxDriverInfo *drvInfo)
+{
+    if ((devInfo == nullptr) || (waTable == nullptr) || (drvInfo == nullptr))
+    {
+        DEVINFO_ERROR("null ptr is passed\n");
+        return false;
+    }
+
+    waTable->WaForceGlobalGTT = 0;
+    if (drvInfo->hasPpgtt == 0)
+    {
+        waTable->WaForceGlobalGTT = 1;
+    }
+
+    waTable->WaUseVAlign16OnTileXYBpp816 = 1;
+    waTable->WaDisregardPlatformChecks = 1;
+
+    return true;
+}
+
 static struct GfxDeviceInfo bdwGt1Info = {
     .platformType  = PLATFORM_MOBILE,
     .productFamily = IGFX_BROADWELL,
@@ -297,3 +393,38 @@ static bool bdwDevice162e = DeviceInfoFactory<GfxDeviceInfo>::
 /* Whether GT4 is needed? */
 static bool bdwDevice163b = DeviceInfoFactory<GfxDeviceInfo>::
     RegisterDevice(0x163b, &bdwGt3eInfo);
+
+// Cherryview (Braswell) device info
+static struct GfxDeviceInfo chvInfo = {
+    .platformType  = PLATFORM_MOBILE,
+    .productFamily = IGFX_CHERRYVIEW,
+    .displayFamily = IGFX_GEN8_CORE,
+    .renderFamily  = IGFX_GEN8_CORE,
+    .mediaFamily   = IGFX_GEN8_CORE,
+    .eGTType       = GTTYPE_GT1,
+    .L3CacheSizeInKb = 256,
+    .L3BankCount   = 1,
+    .EUCount       = 16,
+    .SliceCount    = 1,
+    .SubSliceCount = 2,
+    .MaxEuPerSubSlice = 8,
+    .isLCIA        = 1,
+    .hasLLC        = 0,
+    .hasERAM       = 0,
+    .InitMediaSysInfo = InitChvMediaSysInfo,
+    .InitShadowSku    = InitChvShadowSku,
+    .InitShadowWa     = InitChvShadowWa,
+};
+
+// Register Cherryview device IDs (0x22b0 - 0x22b3)
+static bool chvDevice22b0 = DeviceInfoFactory<GfxDeviceInfo>::
+    RegisterDevice(0x22b0, &chvInfo);
+
+static bool chvDevice22b1 = DeviceInfoFactory<GfxDeviceInfo>::
+    RegisterDevice(0x22b1, &chvInfo);
+
+static bool chvDevice22b2 = DeviceInfoFactory<GfxDeviceInfo>::
+    RegisterDevice(0x22b2, &chvInfo);
+
+static bool chvDevice22b3 = DeviceInfoFactory<GfxDeviceInfo>::
+    RegisterDevice(0x22b3, &chvInfo);

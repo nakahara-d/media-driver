@@ -23,6 +23,10 @@ if(GEN8_BDW)
     media_include_subdirectory(media_interfaces_m8_bdw)
 endif()
 
+if(GEN8_CHV)
+    media_include_subdirectory(media_interfaces_m8_chv)
+endif()
+
 if(GEN9_BXT)
     media_include_subdirectory(media_interfaces_m9_bxt)
 endif()

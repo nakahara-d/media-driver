@@ -22,6 +22,9 @@ option(GEN8 "Enable Gen8 support" ON)
 cmake_dependent_option(GEN8_BDW
     "Enabled BDW support (Gen8)" ON
     "GEN8" OFF)
+cmake_dependent_option(GEN8_CHV
+    "Enabled CHV support (Gen8)" ON
+    "GEN8" OFF)
 
 option(GEN9 "Enable Gen9 support" ON)
 cmake_dependent_option(GEN9_BXT
@@ -146,6 +149,10 @@ endif()
 
 if(GEN8_BDW)
     add_definitions(-DIGFX_GEN8_BDW_SUPPORTED)
+endif()
+
+if(GEN8_CHV)
+    add_definitions(-DIGFX_GEN8_CHV_SUPPORTED)
 endif()
 
 if(GEN9)

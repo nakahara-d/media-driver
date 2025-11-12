@@ -41,7 +41,7 @@
 #include "mhw_vebox_g8_X.h"
 #include "mhw_vdbox_mfx_g8_bdw.h"
 
-#include "codechal_hw_g8_X.h"
+#include "codechal_hw_g8_bdw.h"
 
 #ifdef _AVC_DECODE_SUPPORTED
 #include "codechal_decode_avc.h"
@@ -131,7 +131,7 @@ class CodechalInterfacesG8Chv : public CodechalDevice
 public:
     using Decode = CodechalDecodeInterfacesG8Chv;
     using Encode = CodechalEncodeInterfacesG8Chv;
-    using Hw = CodechalHwInterfaceG8X;
+    using Hw = CodechalHwInterfaceG8Bdw;
 
     MOS_STATUS Initialize(
         void *standardInfo,

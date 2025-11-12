@@ -76,7 +76,7 @@
 #include "cm_hal_g8.h"
 #include "vphal_g8.h"
 
-#include "renderhal_g8.h"
+#include "renderhal_g8_bdw.h"
 
 class MhwInterfacesG8Chv : public MhwInterfaces
 {
@@ -163,7 +163,7 @@ public:
 class RenderHalInterfacesG8Chv : public RenderHalDevice
 {
 protected:
-    using XRenderHal = XRenderHal_Interface_g8;
+    using XRenderHal = XRenderHal_Interface_g8_bdw;
     MOS_STATUS Initialize();
 };
 
